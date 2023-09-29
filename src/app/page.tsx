@@ -7,7 +7,6 @@ import Card from "@/components/Card";
 import { IHero } from "@/interfaces/IHero";
 import { IHeroes } from "@/interfaces/IHeroes";
 import CompareModal from "@/components/CompareModal";
-import { styled } from '@mui/material/styles';
 export default function Home() {
   const heroesStore = useHeroesStore();
   const [filterText, setFilterText] = useState("");

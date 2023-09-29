@@ -35,7 +35,7 @@ export default function CompareModal({
   heroes,
 }: ICompareModalProps) {
   if (!heroes || heroes.length !== 2) {
-    return null; // Ou renderize uma mensagem de erro
+    return null; 
   }
 
   const hero1PowerSum = Object.values(heroes[0].powerstats).reduce(

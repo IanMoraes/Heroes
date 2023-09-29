@@ -7,7 +7,6 @@ interface IHeroesStoreProps {
   removeAllHeroes: ()=>void
 }
 
-// Defina um StateCreator tipado
 const createState: StateCreator<IHeroesStoreProps> = (set) => ({
   heroes: [],
   setHeroes: (data: IHeroes) => set({ heroes: data }),
