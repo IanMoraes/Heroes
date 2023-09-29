@@ -1,95 +1,85 @@
-import Image from 'next/image'
-import styles from './page.module.css'
-
+"use client";
+import React, { useState, useEffect } from "react";
+import { Grid, Container, TextField } from "@mui/material";
+import useHeroesStore from "@/stores/useHeroesStore";
+import HeroesService from "@/services/HeroesService";
+import Card from "@/components/Card";
+import { IHero } from "@/interfaces/IHero";
+import { IHeroes } from "@/interfaces/IHeroes";
+import CompareModal from "@/components/CompareModal";
+import { styled } from '@mui/material/styles';
 export default function Home() {
+  const heroesStore = useHeroesStore();
+  const [filterText, setFilterText] = useState("");
+  const [selectedHeroes, setSelectedHeroes] = useState<IHeroes>([]);
+  const [openCompareModal, setOpenCompareModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    HeroesService.getUsers().then((data) => {
+      heroesStore.setHeroes(data);
+    });
+  }, []);
+
+  const filteredHeroes = heroesStore.heroes.filter((hero) =>
+    hero.name.toLowerCase().includes(filterText.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (selectedHeroes.length === 2) handleOpenCompareModal();
+  }, [selectedHeroes]);
+
+  const handleCardClick = (hero: IHero) => {
+    if (selectedHeroes.length < 2) {
+      if (!selectedHeroes.includes(hero)) {
+        setSelectedHeroes([...selectedHeroes, hero]);
+      } else {
+        const updatedHeroes = selectedHeroes.filter(
+          (selectedHero) => selectedHero !== hero
+        );
+        setSelectedHeroes(updatedHeroes);
+      }
+    }
+  };
+
+  const handleOpenCompareModal = () => {
+    setOpenCompareModal(!openCompareModal);
+  };
+
+  const onCloseCompareModal = () => {
+    handleOpenCompareModal();
+    setSelectedHeroes([]);
+  };
+  
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <main>
+      <Container>
+        <TextField
+          label="Filtrar por nome de herói"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+          sx={{ input: { color: "#fafafa" } }}
         />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+          {filteredHeroes.map((hero) => {
+            return (
+              <Card
+                key={hero.id}
+                hero={hero}
+                selected={selectedHeroes.includes(hero)}
+                onClick={() => handleCardClick(hero)}
+              />
+            );
+          })}
+        </Grid>
+        <CompareModal
+          heroes={selectedHeroes}
+          open={openCompareModal}
+          onClose={onCloseCompareModal}
+        />
+      </Container>
     </main>
-  )
+  );
 }
